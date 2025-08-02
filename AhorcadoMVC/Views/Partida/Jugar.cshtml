@@ -1,0 +1,71 @@
+﻿@{
+    ViewBag.Title = "Partida";
+}
+
+@model AhorcadoMVC.Models.JugarPartidaViewModel
+<main>
+    <h2 class="titulo-partida">Partida de @Model.NombreJugador - Nivel: @Model.Nivel</h2>
+    <div id="juego-container" class="juego-container">
+        <div class="info-tiempo">
+            <h4>Tiempo:</h4>
+            <h4><span id="tiempo" class="tiempo">@Model.TiempoLimite</span> Segundos</h4>
+            <button class="btn-reiniciar bi bi-arrow-counterclockwise">Reiniciar </button>
+        </div>
+
+        <canvas id="ahorcado-canvas" class="ahorcado-canvas" width="200" height="250"></canvas>
+
+        <div class="div-agregar-palabra">
+            <span>Quieres agregar una palabra <br />nueva al diccionario?</span>
+            <a class="btn-agregar-palabra" href="#">Agregar Palabra</a>
+        </div>
+    </div>
+    <div id="info-partida" class="info-partida">
+        <p id="palabra" class="palabra">@(new string('_', Model.Palabra.Length))</p>
+        <p>Errores: <span id="errores" class="errores">0</span> / 5</p>
+    </div>
+
+    <!--Teclado-->
+    <section class="section-teclado">
+        <div id="teclado" class="teclado">
+        </div>
+    </section>
+
+    <!--Escalafón de Jugadores-->
+    <section class="section-escalafon">
+        <table id="escalafon" class="escalafon">
+            <tr>
+                <th>Identificación</th>
+                <th>Nombre</th>
+                <th>Marcador</th>
+                <th>|</th>
+                <th>Ganadas</th>
+                <th>Perdidas</th>
+            </tr>
+            <tr>
+                <td>Test1</td>
+                <td>Test1</td>
+                <td>Test1</td>
+                <td>|</td>
+                <td>Test1</td>
+                <td>Test1</td>
+            </tr>
+            <tr>
+                <td>Test2</td>
+                <td>Test2</td>
+                <td>Test2</td>
+                <td>|</td>
+                <td>Test2</td>
+                <td>Test2</td>
+            </tr>
+        </table>
+    </section>
+
+    @section Scripts {
+        <script>
+        const palabraSecreta = "@Model.Palabra".toUpperCase();
+        const tiempoLimite = @Model.TiempoLimite;
+        </script>
+        <script src="~/scripts/scriptPartida.js"></script>
+    }
+</main>
+

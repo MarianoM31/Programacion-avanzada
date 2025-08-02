@@ -4,9 +4,29 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AhorcadoMVC.Models
 {
+    [Table("Palabras")]
+    public class Palabra
+    {
+        [Key]
+        public int id_palabra { get; set; }
+
+        [Required]
+        [MaxLength(20)]
+        public string palabra { get; set; }
+
+        // Relación con Partida
+        public virtual ICollection<Partida> Partidas { get; set; }
+    }
+    
+}
+
+    /*
     [Table("Palabra")]
     public class Palabra
     {
+        internal int id_palabra;
+        internal string palabra;
+
         [Key]
         public int Id { get; set; }
 
@@ -39,4 +59,4 @@ namespace AhorcadoMVC.Models
 
 
     }
-}
+*/

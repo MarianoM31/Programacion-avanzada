@@ -1,4 +1,6 @@
-﻿using System;
+﻿using AhorcadoMVC.Data.AhorcadoMVC.Models;
+using AhorcadoMVC.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -8,7 +10,26 @@ namespace AhorcadoMVC.Controllers
 {
     public class HomeController : Controller
     {
+        private readonly ApplicationDbContext _context = new ApplicationDbContext();
+
         public ActionResult Index()
+        {
+            var niveles = _context.Niveles
+                .Select(n => new SelectListItem
+                {
+                    Value = n.id_nivel.ToString(),
+                    Text = n.nombre_nivel
+                }).ToList();
+
+            var model = new NuevaPartidaViewModel
+            {
+                Niveles = niveles
+            };
+
+            return View(model);
+        }
+
+        public ActionResult Partidas()
         {
             return View();
         }

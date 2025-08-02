@@ -39,7 +39,7 @@
                 @using (Html.BeginForm("Crear", "Partida", FormMethod.Post))
                 {
                     <div class="input-div">
-                        @Html.LabelFor(m => m.Identificacion, "Identificación")
+                        @Html.LabelFor(m => m.Identificacion, "Identificacion")
                         @Html.TextBoxFor(m => m.Identificacion, new { id = "identificacion-newrun", required = "required" })
                         @Html.ValidationMessageFor(m => m.Identificacion)
                     </div>
@@ -48,6 +48,13 @@
                         @Html.LabelFor(m => m.Nombre, "Nombre")
                         @Html.TextBoxFor(m => m.Nombre, new { id = "nombre-user-newrun", required = "required" })
                         @Html.ValidationMessageFor(m => m.Nombre)
+                    </div>
+
+                    //Dropdown
+                    <div class="input-div">
+                        @Html.LabelFor(m => m.IdNivelSeleccionado, "Nivel de Dificultad")
+                        @Html.DropDownListFor(m => m.IdNivelSeleccionado, Model.Niveles, "Seleccione un nivel", new { @class = "dropdown-div", required = "required" })
+                        @Html.ValidationMessageFor(m => m.IdNivelSeleccionado)
                     </div>
 
                     <div class="btns-newrun">
@@ -69,6 +76,6 @@
 
     <!--Script para Abrir y Cerrar Ventana Emergente-->
     @section Scripts {
-        <script src="/Scripts/miscript.js"></script>
+        <script src="/Scripts/scriptIndex.js"></script>
     }
 </main>

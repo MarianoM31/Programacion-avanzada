@@ -135,8 +135,10 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Models\AppDbContext.cs" />
+    <Compile Include="Models\Nivel.cs" />
+    <Compile Include="Models\JugarPartidaViewModel.cs" />
     <Compile Include="Models\Partida.cs" />
-    <Compile Include="Models\Usuario.cs" />
+    <Compile Include="Models\Jugador.cs" />
     <Compile Include="Models\Palabra.cs" />
     <Compile Include="Models\NuevaPartidaViewModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -165,13 +167,14 @@
     <Content Include="Content\Site.css" />
     <Content Include="Resources\Icons\bootstrap-icons.css" />
     <Content Include="Resources\Icons\bootstrap-icons.min.css" />
-    <Content Include="Resources\Img\rayas-lapiz3.jpg" />
-    <Content Include="Resources\Img\rayas-lapiz2.png" />
+    <Content Include="Resources\Img\pared-blanca.jpg" />
+    <Content Include="Resources\Img\rayas-lapiz1.jpg" />
     <Content Include="Resources\Img\estrellas.png" />
-    <Content Include="Resources\Img\rayas-lapiz.jpg" />
     <Content Include="Resources\Img\papel-arrugado.png" />
     <Content Include="Resources\Img\madera.jpg" />
     <Content Include="Resources\Img\pizarra-tiza.jpg" />
+    <Content Include="Resources\Img\textura-tiza.jpg" />
+    <Content Include="Resources\Img\textura-tiza2.png" />
     <Content Include="Scripts\bootstrap.bundle.js" />
     <Content Include="Scripts\bootstrap.bundle.min.js" />
     <Content Include="Scripts\bootstrap.esm.js" />
@@ -208,8 +211,9 @@
     <Content Include="Scripts\jquery.validate.min.js" />
     <Content Include="Scripts\jquery.validate.unobtrusive.js" />
     <Content Include="Scripts\jquery.validate.unobtrusive.min.js" />
+    <Content Include="Scripts\scriptPartida.js" />
     <Content Include="Scripts\modernizr-2.8.3.js" />
-    <Content Include="Scripts\miscript.js" />
+    <Content Include="Scripts\scriptIndex.js" />
     <Content Include="Web.config" />
     <Content Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
@@ -221,14 +225,13 @@
     <Content Include="Views\_ViewStart.cshtml" />
     <Content Include="Views\Shared\Error.cshtml" />
     <Content Include="Views\Shared\_Layout.cshtml" />
-    <Content Include="Views\Home\About.cshtml" />
-    <Content Include="Views\Home\Contact.cshtml" />
     <Content Include="Views\Home\Index.cshtml" />
     <Content Include="Views\Home.cshtml" />
     <Content Include="Views\Jugadores.cshtml" />
     <Content Include="Views\Palabras.cshtml" />
     <Content Include="Views\Partidas.cshtml" />
     <Content Include="Views\Usuario\Index.cshtml" />
+    <Content Include="Views\Partida\Jugar.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

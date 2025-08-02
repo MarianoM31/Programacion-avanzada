@@ -1,13 +1,15 @@
-﻿using System.Collections.Generic;
-using System.Configuration;
-using System.Data.SqlClient;
-using System.Web.Mvc;
+﻿using AhorcadoMVC.Data;
 using AhorcadoMVC.Models;
+using System.Collections.Generic;
+using System.Configuration;
+using System.Data.Entity;
+using System.Data.SqlClient;
+using System.Linq;
+using System.Web.Mvc;
 
 namespace AhorcadoMVC.Controllers
 {
-    public class UsuarioController : Controller
-    {
+        /*
         public ActionResult Index()
         {
             List<Usuario> usuarios = new List<Usuario>();
@@ -35,5 +37,5 @@ namespace AhorcadoMVC.Controllers
 
             return View(usuarios);
         }
+        */
     }
-}
