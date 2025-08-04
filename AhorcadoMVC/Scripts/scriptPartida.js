@@ -3,14 +3,20 @@
     const tecladoDiv = $('#teclado');
     const erroresSpan = $('#errores');
     const canvas = $('#ahorcado-canvas')[0];
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas?.getContext('2d'); // Protege si canvas no existe
 
-    let letrasAdivinadas = Array(palabraSecreta.length).fill('_');
-    let errores = 0;
-    const maxErrores = 5;
+    const partidaIdRaw = $('#partida-id').val();
+    const partidaId = parseInt(partidaIdRaw);
+
+    if (!partidaIdRaw || isNaN(partidaId)) {
+        alert("Error: No se pudo obtener el ID de la partida. Verifica si estás en la vista correcta.");
+        return;
+    }
+
+    console.log("Partida ID detectado:", partidaId);
     let juegoTerminado = false;
 
-    // --- 2. TEMPORIZADOR ---
+    // 1. TEMPORIZADOR
     let tiempo = parseInt(tiempoLimite);
     const intervalo = setInterval(() => {
         if (juegoTerminado) return;
@@ -19,104 +25,89 @@
         $('#tiempo').text(tiempo);
 
         if (tiempo <= 0) {
-            finalizarJuego(false); // El jugador pierde si se acaba el tiempo
+            finalizarJuego(false, "Tiempo agotado");
         }
     }, 1000);
 
-    // --- 3. LÓGICA DEL JUEGO ---
-    function normalizar(texto) {
-        return texto.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-    }
-
-    //Creación del Teclado
+    // 2. Crear teclado
     function crearTeclado() {
         const alfabeto = 'ABCDEFGHIJKLMNÑOPQRSTUVWXYZ';
         for (const letra of alfabeto) {
             const $boton = $('<button>').text(letra);
-            $boton.on('click', () => manejarIntento(letra));
+            $boton.on('click', () => manejarIntento(letra, $boton));
             tecladoDiv.append($boton);
         }
     }
 
-    function manejarIntento(letra) {
+    // 3. Manejar intento con letra
+    function manejarIntento(letra, boton) {
         if (juegoTerminado) return;
 
-        // Deshabilitar botón
-        const botonPresionado = tecladoDiv.children().filter(function () {
-            return $(this).text() === letra;
-        });
-        botonPresionado.prop('disabled', true);
+        boton.prop('disabled', true);
 
-        const palabraNormalizada = normalizar(palabraSecreta);
-        const letraNormalizada = normalizar(letra);
-        let acierto = false;
+        fetch("/Partida/JugarLetra", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ partidaId: partidaId, letra: letra })
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (!data.success) {
+                    if (data.message) alert(data.message);
+                    return;
+                }
 
-        //Arreglar lo de las tildes NO FUNCIONA BIEN
-        for (let i = 0; i < palabraNormalizada.length; i++) {
-            if (palabraNormalizada[i] === letraNormalizada) {
-                letrasAdivinadas[i] = palabraSecreta[i]; // Conserva tildes
-                acierto = true;
-            }
-        }
+                palabraSpan.text(data.progreso);
+                erroresSpan.text(data.errores);
 
-        actualizarPalabraVisible();
+                if (!data.acierto) {
+                    dibujarAhorcado(data.errores);
+                }
 
-        if (acierto) {
-            if (!letrasAdivinadas.includes('_')) {
-                finalizarJuego(true);
-            }
-        } else {
-            errores++;
-            erroresSpan.text(errores);
-            dibujarAhorcado();
-
-            if (errores >= maxErrores) {
-                finalizarJuego(false);
-            }
-        }
+                if (data.terminado) {
+                    finalizarJuego(data.resultado === "Ganada", data.resultado);
+                }
+            })
+            .catch(() => {
+                alert("Error al conectar con el servidor.");
+            });
     }
 
-    function actualizarPalabraVisible() {
-        palabraSpan.text(letrasAdivinadas.join(''));
-    }
-
-    function finalizarJuego(victoria) {
+    // 4. Finalizar juego
+    function finalizarJuego(victoria, mensaje) {
         juegoTerminado = true;
         clearInterval(intervalo);
-
         tecladoDiv.children().prop('disabled', true);
 
-        if (victoria) {
-            palabraSpan.css('color', 'green');
-            palabraSpan.css('background-color', 'white');
-            palabraSpan.css('border-radius', '10px');
-            setTimeout(() => alert('¡Felicidades, has ganado!'), 200);
-        } else {
-            palabraSpan.css('color', 'red');
-            palabraSpan.css('background-color', 'white');
-            palabraSpan.css('border-radius', '10px');
-            letrasAdivinadas = palabraSecreta.split('');
-            actualizarPalabraVisible();
-            setTimeout(() => alert(`¡Has perdido! La palabra era: ${palabraSecreta}`), 200);
-        }
+        palabraSpan.css({
+            'background-color': 'white',
+            'border-radius': '10px',
+            'color': victoria ? 'green' : 'red'
+        });
+
+        setTimeout(() => {
+            if (victoria) {
+                alert("¡Felicidades! Has ganado 🎉");
+            } else {
+                alert(`Has perdido. ${mensaje || ''}`);
+            }
+        }, 200);
     }
 
-    // --- 4. DIBUJO DEL AHORCADO ---
+    // 5. Dibujo del ahorcado
     let texturaCargada = null;
 
-    //Cargar imagen como textura
     const img = new Image();
     img.src = "/Resources/Img/textura-tiza.jpg";
     img.onload = function () {
-        texturaCargada = ctx.createPattern(img, 'repeat');
+        if (ctx) {
+            texturaCargada = ctx.createPattern(img, 'repeat');
+        }
     };
 
-    //Dubujo del ahorcado
-    function dibujarAhorcado() {
-
-        if (!texturaCargada) {
-            //Aún no ha cargado la imagen, salta o espera
-            console.warn("La textura aún no se ha cargado.");
+    function dibujarAhorcado(errores) {
+        if (!ctx || !texturaCargada) {
+            console.warn("Contexto del canvas o textura no cargados.");
             return;
         }
 
@@ -160,10 +151,9 @@
                 ctx.lineTo(180, 200);
                 ctx.stroke();
                 break;
-
         }
     }
 
-    // --- 5. INICIALIZACIÓN ---
+    // 6. Inicialización
     crearTeclado();
 });

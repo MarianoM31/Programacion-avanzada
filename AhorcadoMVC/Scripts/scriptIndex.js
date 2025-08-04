@@ -20,14 +20,14 @@
                 url: '/Partida/ObtenerNombreJugador',
                 type: 'GET',
                 data: { id: id },
-                success: function (nombre) {
-                    if (nombre) {
-                        $("#nombre-user-newrun").val(nombre);
+                success: function (data) {
+                    if (data.success) {
+                        $("#nombre-user-newrun").val(data.nombre);
                     } else {
-                        $("#nombre-user-newrun").val("");//Limpiar si no existe
+                        $("#nombre-user-newrun").val(""); // Limpiar si no existe
                     }
                 }
             });
         }
     });
-});
+})

@@ -2,9 +2,8 @@
 using AhorcadoMVC.Data.AhorcadoMVC.Models;
 using AhorcadoMVC.Models;
 using System;
-using System.Configuration;
+using System.Collections.Generic;
 using System.Data.Entity;
-using System.Data.SqlClient;
 using System.Diagnostics;
 using System.Linq;
 using System.Web.Mvc;
@@ -20,20 +19,19 @@ namespace AhorcadoMVC.Controllers
         {
             if (!ModelState.IsValid)
             {
-                //Recargar los niveles si la validación falla
                 model.Niveles = db.Niveles
                     .Select(n => new SelectListItem
                     {
                         Value = n.id_nivel.ToString(),
                         Text = n.nombre_nivel
                     }).ToList();
+
                 return View("~/Views/Home/Index.cshtml", model);
             }
 
             var jugador = db.Jugadores.FirstOrDefault(j => j.id_jugador == model.Identificacion);
             Debug.WriteLine("ID ingresado: " + model.Identificacion);
 
-            // Si no existe el jugador, lo creamos
             if (jugador == null)
             {
                 jugador = new Jugador
@@ -45,7 +43,6 @@ namespace AhorcadoMVC.Controllers
                 db.SaveChanges();
             }
 
-            //Seleccionar una palabra aleatoria
             var palabraRandom = db.Palabras.OrderBy(x => Guid.NewGuid()).FirstOrDefault();
             if (palabraRandom == null)
             {
@@ -56,21 +53,14 @@ namespace AhorcadoMVC.Controllers
             {
                 id_jugador = jugador.id_jugador,
                 id_nivel = model.IdNivelSeleccionado,
-                id_palabra = palabraRandom.id_palabra
+                id_palabra = palabraRandom.id_palabra,
+                fecha = DateTime.Now
             };
 
             db.Partidas.Add(partida);
             db.SaveChanges();
 
-            //Redireccionar a la vista de juego
             return RedirectToAction("Jugar", new { id = partida.id_partida });
-        }
-
-        [HttpGet]
-        public JsonResult ObtenerNombreJugador(int id)
-        {
-            var jugador = db.Jugadores.FirstOrDefault(j => j.id_jugador == id);
-            return Json(jugador != null ? jugador.nombre : "", JsonRequestBehavior.AllowGet);
         }
 
         public ActionResult Jugar(int id)
@@ -84,6 +74,9 @@ namespace AhorcadoMVC.Controllers
             if (partida == null)
                 return HttpNotFound();
 
+            Session[$"LetrasUsadas_{id}"] = new List<string>();
+            Session[$"Errores_{id}"] = 0;
+
             var modelo = new JugarPartidaViewModel
             {
                 IdPartida = partida.id_partida,
@@ -96,6 +89,125 @@ namespace AhorcadoMVC.Controllers
             return View(modelo);
         }
 
+        [HttpPost]
+        public ActionResult Reiniciar(int id)
+        {
+            var partidaAnterior = db.Partidas
+                .Include(p => p.Jugador)
+                .Include(p => p.Nivel)
+                .FirstOrDefault(p => p.id_partida == id);
+
+            if (partidaAnterior == null)
+                return HttpNotFound();
+
+            if (string.IsNullOrEmpty(partidaAnterior.resultado))
+            {
+                partidaAnterior.resultado = "Perdida";
+                db.SaveChanges();
+            }
+
+            var nuevaPalabra = db.Palabras.OrderBy(p => Guid.NewGuid()).FirstOrDefault();
+            if (nuevaPalabra == null)
+                return Content("No hay palabras disponibles.");
+
+            var nuevaPartida = new Partida
+            {
+                id_jugador = partidaAnterior.id_jugador,
+                id_nivel = partidaAnterior.id_nivel,
+                id_palabra = nuevaPalabra.id_palabra,
+                fecha = DateTime.Now
+            };
+
+            db.Partidas.Add(nuevaPartida);
+            db.SaveChanges();
+
+            return RedirectToAction("Jugar", new { id = nuevaPartida.id_partida });
+        }
+
+        [HttpPost]
+        public JsonResult JugarLetra(int partidaId, string letra)
+        {
+            letra = Normalizar(letra);
+            var partida = db.Partidas.Include(p => p.Palabra).FirstOrDefault(p => p.id_partida == partidaId);
+            if (partida == null || string.IsNullOrEmpty(letra))
+                return Json(new { success = false });
+
+            var palabraCorrecta = partida.Palabra.palabra;
+            var palabraSinTildes = Normalizar(palabraCorrecta);
+            var letrasUnicas = palabraSinTildes.Distinct().ToList();
+
+            var letrasUsadas = Session[$"LetrasUsadas_{partidaId}"] as List<string> ?? new List<string>();
+            var errores = (int?)Session[$"Errores_{partidaId}"] ?? 0;
+
+            if (letrasUsadas.Contains(letra))
+                return Json(new { success = false, message = "Letra ya fue usada." });
+
+            letrasUsadas.Add(letra);
+            Session[$"LetrasUsadas_{partidaId}"] = letrasUsadas;
+
+            bool acierto = palabraSinTildes.Contains(letra);
+            if (!acierto)
+            {
+                errores++;
+                Session[$"Errores_{partidaId}"] = errores;
+            }
+
+            bool gano = letrasUnicas.All(l => letrasUsadas.Contains(l.ToString()));
+            bool perdio = errores >= 5;
+
+            if (gano)
+            {
+                partida.resultado = "Ganada";
+                db.SaveChanges();
+            }
+            else if (perdio)
+            {
+                partida.resultado = "Perdida";
+                db.SaveChanges();
+            }
+
+            return Json(new
+            {
+                success = true,
+                letra,
+                acierto,
+                progreso = MostrarProgreso(palabraCorrecta, letrasUsadas),
+                errores,
+                terminado = gano || perdio,
+                resultado = partida.resultado
+            });
+        }
+
+        [HttpGet]
+        public JsonResult ObtenerNombreJugador(int id)
+        {
+            var jugador = db.Jugadores.FirstOrDefault(j => j.id_jugador == id);
+            return Json(jugador != null ? jugador.nombre : "", JsonRequestBehavior.AllowGet);
+        }
+
+
+        private string Normalizar(string input)
+        {
+            var conTilde = "áéíóúÁÉÍÓÚ";
+            var sinTilde = "aeiouAEIOU";
+            for (int i = 0; i < conTilde.Length; i++)
+                input = input.Replace(conTilde[i], sinTilde[i]);
+            return input.ToUpper();
+        }
+
+        private string MostrarProgreso(string palabra, List<string> letrasUsadas)
+        {
+            var resultado = "";
+            foreach (var letra in palabra)
+            {
+                if (letrasUsadas.Contains(Normalizar(letra.ToString())))
+                    resultado += letra + " ";
+                else
+                    resultado += "_ ";
+            }
+            return resultado.Trim();
+        }
+
         protected override void Dispose(bool disposing)
         {
             if (disposing)
@@ -106,63 +218,3 @@ namespace AhorcadoMVC.Controllers
         }
     }
 }
-
-
-
-/*
-[HttpPost]
-public ActionResult Crear(NuevaPartidaViewModel modelo)
-{
-    if (!ModelState.IsValid)
-    {
-        TempData["Mensaje"] = "Datos incompletos. Verifica el formulario.";
-        return RedirectToAction("Index", "Home");
-    }
-
-    string connectionString = ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString;
-
-    using (SqlConnection conn = new SqlConnection(connectionString))
-    {
-        conn.Open();
-
-        string email = modelo.Identificacion + "@demo.com";
-
-        // Verificar si ya existe el usuario por Email
-        string checkQuery = "SELECT COUNT(*) FROM Usuario WHERE Email = @Email";
-        SqlCommand checkCmd = new SqlCommand(checkQuery, conn);
-        checkCmd.Parameters.AddWithValue("@Email", email);
-        int exists = (int)checkCmd.ExecuteScalar();
-
-        // Insertar usuario si no existe
-        if (exists == 0)
-        {
-            string insertUser = "INSERT INTO Usuario (Nombre, Email, Contrasena, Rol) VALUES (@Nombre, @Email, @Contrasena, @Rol)";
-            SqlCommand insertCmd = new SqlCommand(insertUser, conn);
-            insertCmd.Parameters.AddWithValue("@Nombre", modelo.Nombre);
-            insertCmd.Parameters.AddWithValue("@Email", email);
-            insertCmd.Parameters.AddWithValue("@Contrasena", "demo123");
-            insertCmd.Parameters.AddWithValue("@Rol", "Jugador");
-            insertCmd.ExecuteNonQuery();
-        }
-
-        // Obtener ID del usuario
-        string getUserIdQuery = "SELECT Id FROM Usuario WHERE Email = @Email";
-        SqlCommand getUserCmd = new SqlCommand(getUserIdQuery, conn);
-        getUserCmd.Parameters.AddWithValue("@Email", email);
-        int usuarioId = (int)getUserCmd.ExecuteScalar();
-
-        // Crear nueva partida
-        string insertPartida = "INSERT INTO Partida (UsuarioId, FechaInicio, Estado) VALUES (@UsuarioId, @FechaInicio, @Estado)";
-        SqlCommand partidaCmd = new SqlCommand(insertPartida, conn);
-        partidaCmd.Parameters.AddWithValue("@UsuarioId", usuarioId);
-        partidaCmd.Parameters.AddWithValue("@FechaInicio", DateTime.Now);
-        partidaCmd.Parameters.AddWithValue("@Estado", "En curso");
-        partidaCmd.ExecuteNonQuery();
-    }
-
-    TempData["Mensaje"] = "Partida iniciada correctamente.";
-    return RedirectToAction("Partida", "Partida");
-*/
-
-
-

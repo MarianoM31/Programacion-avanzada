@@ -1,62 +1,18 @@
-﻿using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.RegularExpressions;
 
-namespace AhorcadoMVC.Models
+namespace AhorcadoMVC.Data.AhorcadoMVC.Models
 {
-    [Table("Palabras")]
     public class Palabra
     {
         [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int id_palabra { get; set; }
 
-        [Required]
-        [MaxLength(20)]
+        [Required(ErrorMessage = "La palabra es obligatoria.")]
+        [StringLength(10, MinimumLength = 5, ErrorMessage = "La palabra debe tener entre 5 y 10 letras.")]
+        [RegularExpression(@"^[a-zA-ZñÑáéíóúÁÉÍÓÚ]+$", ErrorMessage = "Solo se permiten letras en español.")]
         public string palabra { get; set; }
-
-        // Relación con Partida
-        public virtual ICollection<Partida> Partidas { get; set; }
     }
-    
 }
-
-    /*
-    [Table("Palabra")]
-    public class Palabra
-    {
-        internal int id_palabra;
-        internal string palabra;
-
-        [Key]
-        public int Id { get; set; }
-
-        [Required]
-        [MaxLength(200)]
-        [Index(IsUnique = true)]
-        public string Texto { get; set; }
-
-        public int? Dificultad { get; set; }
-
-        // Relaciones
-        public virtual ICollection<Partida> Partidas { get; set; }
-
-        [NotMapped]
-       
-        public string DificultadTexto
-        {
-            get
-            {
-                if (Dificultad == 1)
-                    return "Fácil";
-                else if (Dificultad == 2)
-                    return "Media";
-                else if (Dificultad == 3)
-                    return "Difícil";
-                else
-                    return "Desconocida";
-            }
-        }
-
-
-    }
-*/

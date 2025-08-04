@@ -1,8 +1,10 @@
 ﻿    using System;
     using System.ComponentModel.DataAnnotations;
     using System.ComponentModel.DataAnnotations.Schema;
+    using AhorcadoMVC.Data.AhorcadoMVC.Models;
 
-    namespace AhorcadoMVC.Models
+
+namespace AhorcadoMVC.Models
     {
 
     [Table("Partidas")]
