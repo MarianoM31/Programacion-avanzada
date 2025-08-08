@@ -15,31 +15,7 @@ erDiagram
     JUGADORES ||--o{ PARTIDAS : "tiene"
     NIVELES   ||--o{ PARTIDAS : "configura"
     PALABRAS  ||--o{ PARTIDAS : "usa"
-
-    JUGADORES {
-        INT id_jugador PK
-        NVARCHAR(100) nombre
-    }
-
-    NIVELES {
-        INT id_nivel PK
-        NVARCHAR(20) nombre_nivel
-        INT tiempo_segundos
-    }
-
-    PALABRAS {
-        INT id_palabra PK
-        NVARCHAR(20) palabra  "UNIQUE, LEN 5–10"
-    }
-
-    PARTIDAS {
-        INT id_partida PK "IDENTITY(1,1)"
-        INT id_jugador FK
-        INT id_nivel FK
-        INT id_palabra FK
-        DATETIME fecha "DEFAULT GETDATE()"
-        VARCHAR(10) resultado "Ganada|Perdida"
-    }
+    JUGADORES ||--o{ VISTA_ESCALAFON : "agrega (vista)"
 
 #Prompts de IA usados
 
