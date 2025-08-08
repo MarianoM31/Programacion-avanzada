@@ -128,7 +128,6 @@
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="Controllers\PalabraController.cs" />
-    <Compile Include="Controllers\UsuarioController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\PartidaController.cs" />
     <Compile Include="Data\ApplicationDbContext.cs" />
@@ -136,6 +135,7 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Models\AppDbContext.cs" />
+    <Compile Include="Models\RankingItemViewModel.cs" />
     <Compile Include="Models\Nivel.cs" />
     <Compile Include="Models\JugarPartidaViewModel.cs" />
     <Compile Include="Models\Partida.cs" />
@@ -161,6 +161,7 @@
     <Content Include="Content\bootstrap.min.css" />
     <Content Include="Content\bootstrap.rtl.css" />
     <Content Include="Content\bootstrap.rtl.min.css" />
+    <Content Include="Content\img\hangman.png" />
     <Content Include="favicon.ico" />
     <Content Include="Resources\Fonts\Winky_Rough\OFL.txt" />
     <Content Include="Resources\Fonts\Winky_Rough\README.txt" />
@@ -233,6 +234,7 @@
     <Content Include="Views\Partidas.cshtml" />
     <Content Include="Views\Usuario\Index.cshtml" />
     <Content Include="Views\Partida\Jugar.cshtml" />
+    <Content Include="Views\Home\Ranking.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

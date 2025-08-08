@@ -1,13 +1,13 @@
-﻿@{
+﻿@model AhorcadoMVC.Models.NuevaPartidaViewModel
+@{
     ViewBag.Title = "Home Page";
 }
 
-@model AhorcadoMVC.Models.NuevaPartidaViewModel
-
 <main>
     <section class="row" aria-labelledby="aspnetTitle">
-        <h1 id="title">Bienvenido a Ahorcado!</h1>
+        <h1 id="title">¡Bienvenido a Ahorcado!</h1>
     </section>
+
     <section>
         <p>
             <br />Este es el clásico juego del Ahorcado, en el que tu objetivo será adivinar una palabra secreta.
@@ -17,29 +17,38 @@
         <p>
             <br />Pon a prueba tu vocabulario, tu lógica y tu memoria mientras te diviertes con este entretenido desafío.
             <br />Puedes jugar las veces que quieras y mejorar tus habilidades con cada partida,
-            <br />podrá ir sumar puntos  con cada partida ganada, de lo contrario se te restarán puntos.
+            <br />podrás sumar puntos con cada partida ganada; de lo contrario se te restarán puntos.
         </p>
         <p>
             <br />¿Podrás descubrir la palabra antes de que se te acabe el tiempo? ¡Haz clic en Nueva Partida y descúbrelo!
         </p>
     </section>
 
+    <!-- Botones principales -->
     <section>
         <a class="btn-nuevaPartida" id="btnNuevaPartida" href="#">Nueva Partida</a>
+        <button id="btnVerMarcador" class="btn-nuevaPartida" style="margin-left:10px;">Ver escalafón</button>
+        <a class="btn-agregar-palabra" href="/Palabra/Agregar" style="margin-left:10px;">Agregar palabra</a>
     </section>
 
+    <!-- Contenedor del escalafón (toggle) -->
+    <section id="ranking-wrapper" style="display:none; margin-top:1rem;">
+        @Html.Action("Ranking", "Home")
+    </section>
+
+    <!-- Panel para crear nueva partida -->
     <section class="display-newrun" id="display-newrun">
         <div class="form-newrun">
             <div class="head-newrun">
-
                 <span class="title-newrun">Nueva Partida</span>
                 <i id="btnCloseXNewRun" class="bi bi-x"></i>
             </div>
+
             <div class="input-newrun">
                 @using (Html.BeginForm("Crear", "Partida", FormMethod.Post))
                 {
                     <div class="input-div">
-                        @Html.LabelFor(m => m.Identificacion, "Identificacion")
+                        @Html.LabelFor(m => m.Identificacion, "Identificación")
                         @Html.TextBoxFor(m => m.Identificacion, new { id = "identificacion-newrun", required = "required" })
                         @Html.ValidationMessageFor(m => m.Identificacion)
                     </div>
@@ -50,23 +59,23 @@
                         @Html.ValidationMessageFor(m => m.Nombre)
                     </div>
 
-                    //Dropdown
+                    @* Dropdown *@
                     <div class="input-div">
                         @Html.LabelFor(m => m.IdNivelSeleccionado, "Nivel de Dificultad")
-                        @Html.DropDownListFor(m => m.IdNivelSeleccionado, Model.Niveles, "Seleccione un nivel", new { @class = "dropdown-div", required = "required" })
+                        @Html.DropDownListFor(
+                            m => m.IdNivelSeleccionado,
+                            Model.Niveles,
+                            "Seleccione un nivel",
+                            new { @class = "dropdown-div", required = "required" })
                         @Html.ValidationMessageFor(m => m.IdNivelSeleccionado)
                     </div>
 
                     <div class="btns-newrun">
                         <div>
-                            <div>
-                                <button type="submit" class="btn-start-run" id="btn-start-run">Iniciar Partida</button>
-                            </div>
+                            <button type="submit" class="btn-start-run" id="btn-start-run">Iniciar Partida</button>
                         </div>
                         <div>
-                            <div>
-                                <a class="btnCloseNewRun" id="btnCloseNewRun" href="#">Cerrar</a>
-                            </div>
+                            <a class="btnCloseNewRun" id="btnCloseNewRun" href="#">Cerrar</a>
                         </div>
                     </div>
                 }
@@ -74,8 +83,19 @@
         </div>
     </section>
 
-    <!--Script para Abrir y Cerrar Ventana Emergente-->
     @section Scripts {
         <script src="/Scripts/scriptIndex.js"></script>
+        <script>
+            // Toggle del escalafón
+            (function () {
+                var btn = document.getElementById('btnVerMarcador');
+                var wrap = document.getElementById('ranking-wrapper');
+                btn.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    var isHidden = wrap.style.display === 'none' || wrap.style.display === '';
+                    wrap.style.display = isHidden ? 'block' : 'none';
+                });
+            })();
+        </script>
     }
 </main>

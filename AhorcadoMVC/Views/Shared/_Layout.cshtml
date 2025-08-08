@@ -12,12 +12,15 @@
 </head>
 <body class="body-color-frame">
 
-    <header>
-        @Html.ActionLink("LOGO", "Index", "Home", new { area = "" }, new { @class = "navbar-brand" })
-        <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" title="Toggle navigation" aria-controls="navbarSupportedContent"
-                aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
+    <header class="site-header">
+        <div class="site-header__container">
+            <a href="@Url.Action("Index","Home")" class="navbar-brand" style="display:flex;align-items:center;height:100%;padding:0;">
+                <img src="@Url.Content("~/Content/img/hangman.png")"
+                     alt="Ahorcado"
+                     class="brand-logo"
+                     style="height:70px;width:auto;display:block;" />
+            </a>
+        </div>
     </header>
 
     <div class="container body-content">
