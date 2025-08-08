@@ -8,15 +8,15 @@ Mariano Mora Arrieta               | FI23032359   |   MarianoM31                
 Argenis David Cerrato Amador       | FH23015629   |   imDavid64                         |  davidamador0999@gmail.com
 
 
-### Diagrama (Mermaid)
+# Diagrama (Mermaid)
 
 
-#Prompts de IA usados
+# Prompts de IA usados
 
 Prompts: Necesito un partial para mostrar el escalafón ordenado por Marcador
 Respuesta: Crea RankingItemViewModel y una acción HomeController.Ranking() que consuma Vista_Escalafon
 
-# sitios consultados
+# Sitios Consultados
 
 - Chatgpt
 - Google 
