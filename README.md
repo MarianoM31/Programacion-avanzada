@@ -9,44 +9,49 @@ Argenis David Cerrato Amador       | FH23015629   |   imDavid64                 
 
 
 # Diagrama (Mermaid)
+### Diagrama (Mermaid)
+
+```mermaid
 erDiagram
-    JUGADORES ||--o{ PARTIDAS : "tiene"
-    NIVELES   ||--o{ PARTIDAS : "configura"
-    PALABRAS  ||--o{ PARTIDAS : "usa"
-    JUGADORES ||--o{ VISTA_ESCALAFON : "agrega (vista)"
+  JUGADORES ||--o{ PARTIDAS : "tiene"
+  NIVELES   ||--o{ PARTIDAS : "configura"
+  PALABRAS  ||--o{ PARTIDAS : "usa"
+  JUGADORES ||--o{ VISTA_ESCALAFON : "agrega (vista)"
 
-    JUGADORES {
-        INT id_jugador PK "PK (no IDENTITY)"
-        NVARCHAR(100) nombre "NOT NULL"
-    }
+  JUGADORES {
+    INT id_jugador PK "PK (no IDENTITY)"
+    NVARCHAR(100) nombre "NOT NULL"
+  }
 
-    NIVELES {
-        INT id_nivel PK
-        NVARCHAR(20) nombre_nivel "UNIQUE, NOT NULL"
-        INT tiempo_segundos "NOT NULL"
-    }
+  NIVELES {
+    INT id_nivel PK
+    NVARCHAR(20) nombre_nivel "UNIQUE, NOT NULL"
+    INT tiempo_segundos "NOT NULL"
+  }
 
-    PALABRAS {
-        INT id_palabra PK "IDENTITY(1,1)"
-        NVARCHAR(20) palabra "UNIQUE, NOT NULL, CHECK LEN 5..10"
-    }
+  PALABRAS {
+    INT id_palabra PK "IDENTITY(1,1)"
+    NVARCHAR(20) palabra "UNIQUE, NOT NULL, CHECK LEN 5..10"
+  }
 
-    PARTIDAS {
-        INT id_partida PK "IDENTITY(1,1)"
-        INT id_jugador FK "-> JUGADORES.id_jugador, NOT NULL"
-        INT id_nivel   FK "-> NIVELES.id_nivel, NOT NULL"
-        INT id_palabra FK "-> PALABRAS.id_palabra, NOT NULL"
-        DATETIME fecha "DEFAULT GETDATE(), NOT NULL"
-        VARCHAR(10) resultado "CHECK ('Ganada','Perdida')"
-    }
+  PARTIDAS {
+    INT id_partida PK "IDENTITY(1,1)"
+    INT id_jugador FK "-> JUGADORES.id_jugador, NOT NULL"
+    INT id_nivel   FK "-> NIVELES.id_nivel, NOT NULL"
+    INT id_palabra FK "-> PALABRAS.id_palabra, NOT NULL"
+    DATETIME fecha "DEFAULT GETDATE(), NOT NULL"
+    VARCHAR(10) resultado "CHECK ('Ganada','Perdida')"
+  }
 
-    VISTA_ESCALAFON {
-        INT id_jugador "de JUGADORES"
-        NVARCHAR(100) nombre
-        INT Marcador   "SUM ponderada por nivel (+/-1,+/-2,+/-3)"
-        INT Ganadas
-        INT Perdidas
-    }
+  VISTA_ESCALAFON {
+    INT id_jugador "de JUGADORES"
+    NVARCHAR(100) nombre
+    INT Marcador
+    INT Ganadas
+    INT Perdidas
+  }
+```
+
 
 
 # Prompts de IA usados
@@ -60,5 +65,6 @@ Respuesta: Crea RankingItemViewModel y una acción HomeController.Ranking() que 
 - Google 
 - https://www.youtube.com/watch?v=C4kahP-ucT0&t=1s
 - https://gist.github.com/keraf/b3d5bacc7be1d4e681bfbac91722957e
+- https://github.blog/developer-skills/github/include-diagrams-markdown-files-mermaid/
 
 
