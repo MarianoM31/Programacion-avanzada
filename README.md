@@ -9,6 +9,44 @@ Argenis David Cerrato Amador       | FH23015629   |   imDavid64                 
 
 
 # Diagrama (Mermaid)
+erDiagram
+    JUGADORES ||--o{ PARTIDAS : "tiene"
+    NIVELES   ||--o{ PARTIDAS : "configura"
+    PALABRAS  ||--o{ PARTIDAS : "usa"
+    JUGADORES ||--o{ VISTA_ESCALAFON : "agrega (vista)"
+
+    JUGADORES {
+        INT id_jugador PK "PK (no IDENTITY)"
+        NVARCHAR(100) nombre "NOT NULL"
+    }
+
+    NIVELES {
+        INT id_nivel PK
+        NVARCHAR(20) nombre_nivel "UNIQUE, NOT NULL"
+        INT tiempo_segundos "NOT NULL"
+    }
+
+    PALABRAS {
+        INT id_palabra PK "IDENTITY(1,1)"
+        NVARCHAR(20) palabra "UNIQUE, NOT NULL, CHECK LEN 5..10"
+    }
+
+    PARTIDAS {
+        INT id_partida PK "IDENTITY(1,1)"
+        INT id_jugador FK "-> JUGADORES.id_jugador, NOT NULL"
+        INT id_nivel   FK "-> NIVELES.id_nivel, NOT NULL"
+        INT id_palabra FK "-> PALABRAS.id_palabra, NOT NULL"
+        DATETIME fecha "DEFAULT GETDATE(), NOT NULL"
+        VARCHAR(10) resultado "CHECK ('Ganada','Perdida')"
+    }
+
+    VISTA_ESCALAFON {
+        INT id_jugador "de JUGADORES"
+        NVARCHAR(100) nombre
+        INT Marcador   "SUM ponderada por nivel (+/-1,+/-2,+/-3)"
+        INT Ganadas
+        INT Perdidas
+    }
 
 
 # Prompts de IA usados
