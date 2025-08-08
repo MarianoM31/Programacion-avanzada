@@ -10,12 +10,6 @@ Argenis David Cerrato Amador       | FH23015629   |   imDavid64                 
 
 ### Diagrama (Mermaid)
 
-```mermaid
-erDiagram
-    JUGADORES ||--o{ PARTIDAS : "tiene"
-    NIVELES   ||--o{ PARTIDAS : "configura"
-    PALABRAS  ||--o{ PARTIDAS : "usa"
-    JUGADORES ||--o{ VISTA_ESCALAFON : "agrega (vista)"
 
 #Prompts de IA usados
 
