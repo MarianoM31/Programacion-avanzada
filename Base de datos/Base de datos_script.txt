@@ -1,0 +1,228 @@
+CREATE DATABASE AhorcadoDB;
+GO
+
+USE AhorcadoDB;
+GO
+
+-- Tabla de Palabras (Diccionario)
+CREATE TABLE Palabras (
+    id_palabra INT PRIMARY KEY IDENTITY(1,1),
+    palabra NVARCHAR(20) NOT NULL UNIQUE CHECK (LEN(palabra) BETWEEN 5 AND 10)
+);
+GO
+
+-- Tabla de Jugadores
+CREATE TABLE Jugadores (
+    id_jugador INT PRIMARY KEY,
+    nombre NVARCHAR(100) NOT NULL
+);
+GO
+
+-- Tabla de Niveles de Dificultad
+CREATE TABLE Niveles (
+    id_nivel INT PRIMARY KEY,
+    nombre_nivel NVARCHAR(20) UNIQUE NOT NULL,
+    tiempo_segundos INT NOT NULL
+);
+GO
+
+-- Insertar niveles predeterminados
+INSERT INTO Niveles (id_nivel, nombre_nivel, tiempo_segundos)
+VALUES
+(1, 'Fácil', 90),
+(2, 'Normal', 60),
+(3, 'Difícil', 30);
+GO
+
+-- Tabla de Partidas
+CREATE TABLE Partidas (
+    id_partida INT PRIMARY KEY IDENTITY(1,1),
+    id_jugador INT NOT NULL,
+    id_nivel INT NOT NULL,
+    id_palabra INT NOT NULL,
+    fecha DATETIME NOT NULL DEFAULT GETDATE(),
+    resultado VARCHAR(10) CHECK (resultado IN ('Ganada', 'Perdida')),
+    FOREIGN KEY (id_jugador) REFERENCES Jugadores(id_jugador),
+    FOREIGN KEY (id_nivel) REFERENCES Niveles(id_nivel),
+    FOREIGN KEY (id_palabra) REFERENCES Palabras(id_palabra)
+);
+GO
+
+-- Vista para escalafón de jugadores
+CREATE VIEW Vista_Escalafon AS
+SELECT 
+    j.id_jugador,
+    j.nombre,
+    SUM(
+        CASE 
+            WHEN p.resultado = 'Ganada' AND n.nombre_nivel = 'Fácil' THEN 1
+            WHEN p.resultado = 'Ganada' AND n.nombre_nivel = 'Normal' THEN 2
+            WHEN p.resultado = 'Ganada' AND n.nombre_nivel = 'Difícil' THEN 3
+            WHEN p.resultado = 'Perdida' AND n.nombre_nivel = 'Fácil' THEN -1
+            WHEN p.resultado = 'Perdida' AND n.nombre_nivel = 'Normal' THEN -2
+            WHEN p.resultado = 'Perdida' AND n.nombre_nivel = 'Difícil' THEN -3
+            ELSE 0
+        END
+    ) AS Marcador,
+    SUM(CASE WHEN p.resultado = 'Ganada' THEN 1 ELSE 0 END) AS Ganadas,
+    SUM(CASE WHEN p.resultado = 'Perdida' THEN 1 ELSE 0 END) AS Perdidas
+FROM Jugadores j
+LEFT JOIN Partidas p ON j.id_jugador = p.id_jugador
+LEFT JOIN Niveles n ON p.id_nivel = n.id_nivel
+GROUP BY j.id_jugador, j.nombre;
+GO
+
+
+
+INSERT INTO Palabras (palabra) VALUES ('árbol');
+INSERT INTO Palabras (palabra) VALUES ('avión');
+INSERT INTO Palabras (palabra) VALUES ('ángulo');
+INSERT INTO Palabras (palabra) VALUES ('abeja');
+INSERT INTO Palabras (palabra) VALUES ('amistad');
+INSERT INTO Palabras (palabra) VALUES ('azúcar');
+INSERT INTO Palabras (palabra) VALUES ('barco');
+INSERT INTO Palabras (palabra) VALUES ('bóveda');
+INSERT INTO Palabras (palabra) VALUES ('balcón');
+INSERT INTO Palabras (palabra) VALUES ('búho');
+INSERT INTO Palabras (palabra) VALUES ('bastón');
+INSERT INTO Palabras (palabra) VALUES ('batería');
+INSERT INTO Palabras (palabra) VALUES ('camión');
+INSERT INTO Palabras (palabra) VALUES ('cóndor');
+INSERT INTO Palabras (palabra) VALUES ('césped');
+INSERT INTO Palabras (palabra) VALUES ('cantar');
+INSERT INTO Palabras (palabra) VALUES ('cabina');
+INSERT INTO Palabras (palabra) VALUES ('cálculo');
+INSERT INTO Palabras (palabra) VALUES ('dedal');
+INSERT INTO Palabras (palabra) VALUES ('dólar');
+INSERT INTO Palabras (palabra) VALUES ('dragón');
+INSERT INTO Palabras (palabra) VALUES ('dulces');
+INSERT INTO Palabras (palabra) VALUES ('diseño');
+INSERT INTO Palabras (palabra) VALUES ('débil');
+INSERT INTO Palabras (palabra) VALUES ('edificio');
+INSERT INTO Palabras (palabra) VALUES ('espejo');
+INSERT INTO Palabras (palabra) VALUES ('éxito');
+INSERT INTO Palabras (palabra) VALUES ('ensayo');
+INSERT INTO Palabras (palabra) VALUES ('espina');
+INSERT INTO Palabras (palabra) VALUES ('eléctrico');
+INSERT INTO Palabras (palabra) VALUES ('fútbol');
+INSERT INTO Palabras (palabra) VALUES ('fósforo');
+INSERT INTO Palabras (palabra) VALUES ('fábula');
+INSERT INTO Palabras (palabra) VALUES ('felino');
+INSERT INTO Palabras (palabra) VALUES ('fallece');
+INSERT INTO Palabras (palabra) VALUES ('fresco');
+INSERT INTO Palabras (palabra) VALUES ('gárgola');
+INSERT INTO Palabras (palabra) VALUES ('góndola');
+INSERT INTO Palabras (palabra) VALUES ('género');
+INSERT INTO Palabras (palabra) VALUES ('gracia');
+INSERT INTO Palabras (palabra) VALUES ('gloria');
+INSERT INTO Palabras (palabra) VALUES ('gancho');
+INSERT INTO Palabras (palabra) VALUES ('héroe');
+INSERT INTO Palabras (palabra) VALUES ('hábito');
+INSERT INTO Palabras (palabra) VALUES ('humo');
+INSERT INTO Palabras (palabra) VALUES ('honor');
+INSERT INTO Palabras (palabra) VALUES ('harina');
+INSERT INTO Palabras (palabra) VALUES ('hogar');
+INSERT INTO Palabras (palabra) VALUES ('iglesia');
+INSERT INTO Palabras (palabra) VALUES ('ilusión');
+INSERT INTO Palabras (palabra) VALUES ('ícono');
+INSERT INTO Palabras (palabra) VALUES ('invierno');
+INSERT INTO Palabras (palabra) VALUES ('idea');
+INSERT INTO Palabras (palabra) VALUES ('idioma');
+INSERT INTO Palabras (palabra) VALUES ('jirafa');
+INSERT INTO Palabras (palabra) VALUES ('juguete');
+INSERT INTO Palabras (palabra) VALUES ('jardín');
+INSERT INTO Palabras (palabra) VALUES ('jamón');
+INSERT INTO Palabras (palabra) VALUES ('joven');
+INSERT INTO Palabras (palabra) VALUES ('joyero');
+INSERT INTO Palabras (palabra) VALUES ('kárate');
+INSERT INTO Palabras (palabra) VALUES ('kilómetro');
+INSERT INTO Palabras (palabra) VALUES ('koala');
+INSERT INTO Palabras (palabra) VALUES ('kilo');
+INSERT INTO Palabras (palabra) VALUES ('karaoke');
+INSERT INTO Palabras (palabra) VALUES ('kimono');
+INSERT INTO Palabras (palabra) VALUES ('lápiz');
+INSERT INTO Palabras (palabra) VALUES ('límite');
+INSERT INTO Palabras (palabra) VALUES ('lógico');
+INSERT INTO Palabras (palabra) VALUES ('luna');
+INSERT INTO Palabras (palabra) VALUES ('lengua');
+INSERT INTO Palabras (palabra) VALUES ('lampara');
+INSERT INTO Palabras (palabra) VALUES ('música');
+INSERT INTO Palabras (palabra) VALUES ('máquina');
+INSERT INTO Palabras (palabra) VALUES ('muñeca');
+INSERT INTO Palabras (palabra) VALUES ('montaña');
+INSERT INTO Palabras (palabra) VALUES ('marcha');
+INSERT INTO Palabras (palabra) VALUES ('método');
+INSERT INTO Palabras (palabra) VALUES ('niñez');
+INSERT INTO Palabras (palabra) VALUES ('número');
+INSERT INTO Palabras (palabra) VALUES ('náusea');
+INSERT INTO Palabras (palabra) VALUES ('nobleza');
+INSERT INTO Palabras (palabra) VALUES ('negrita');
+INSERT INTO Palabras (palabra) VALUES ('nube');
+INSERT INTO Palabras (palabra) VALUES ('ñandú');
+INSERT INTO Palabras (palabra) VALUES ('ñoquis');
+INSERT INTO Palabras (palabra) VALUES ('ñuñez');
+INSERT INTO Palabras (palabra) VALUES ('ópera');
+INSERT INTO Palabras (palabra) VALUES ('órgano');
+INSERT INTO Palabras (palabra) VALUES ('óvalo');
+INSERT INTO Palabras (palabra) VALUES ('origen');
+INSERT INTO Palabras (palabra) VALUES ('oleaje');
+INSERT INTO Palabras (palabra) VALUES ('objeto');
+INSERT INTO Palabras (palabra) VALUES ('pájaro');
+INSERT INTO Palabras (palabra) VALUES ('pólvora');
+INSERT INTO Palabras (palabra) VALUES ('pelota');
+INSERT INTO Palabras (palabra) VALUES ('pintor');
+INSERT INTO Palabras (palabra) VALUES ('pasión');
+INSERT INTO Palabras (palabra) VALUES ('percha');
+INSERT INTO Palabras (palabra) VALUES ('química');
+INSERT INTO Palabras (palabra) VALUES ('quijote');
+INSERT INTO Palabras (palabra) VALUES ('quimera');
+INSERT INTO Palabras (palabra) VALUES ('quemado');
+INSERT INTO Palabras (palabra) VALUES ('quinto');
+INSERT INTO Palabras (palabra) VALUES ('quesera');
+INSERT INTO Palabras (palabra) VALUES ('ratón');
+INSERT INTO Palabras (palabra) VALUES ('río');
+INSERT INTO Palabras (palabra) VALUES ('reloj');
+INSERT INTO Palabras (palabra) VALUES ('rápido');
+INSERT INTO Palabras (palabra) VALUES ('rescate');
+INSERT INTO Palabras (palabra) VALUES ('reforma');
+INSERT INTO Palabras (palabra) VALUES ('sándalo');
+INSERT INTO Palabras (palabra) VALUES ('sótano');
+INSERT INTO Palabras (palabra) VALUES ('sábana');
+INSERT INTO Palabras (palabra) VALUES ('salida');
+INSERT INTO Palabras (palabra) VALUES ('sello');
+INSERT INTO Palabras (palabra) VALUES ('sereno');
+INSERT INTO Palabras (palabra) VALUES ('túnel');
+INSERT INTO Palabras (palabra) VALUES ('telón');
+INSERT INTO Palabras (palabra) VALUES ('táctil');
+INSERT INTO Palabras (palabra) VALUES ('tierra');
+INSERT INTO Palabras (palabra) VALUES ('tarde');
+INSERT INTO Palabras (palabra) VALUES ('tablao');
+INSERT INTO Palabras (palabra) VALUES ('único');
+INSERT INTO Palabras (palabra) VALUES ('útil');
+INSERT INTO Palabras (palabra) VALUES ('urgente');
+INSERT INTO Palabras (palabra) VALUES ('ulular');
+INSERT INTO Palabras (palabra) VALUES ('unidad');
+INSERT INTO Palabras (palabra) VALUES ('usanza');
+INSERT INTO Palabras (palabra) VALUES ('viento');
+INSERT INTO Palabras (palabra) VALUES ('vómito');
+INSERT INTO Palabras (palabra) VALUES ('visión');
+INSERT INTO Palabras (palabra) VALUES ('valija');
+INSERT INTO Palabras (palabra) VALUES ('vecino');
+INSERT INTO Palabras (palabra) VALUES ('verano');
+INSERT INTO Palabras (palabra) VALUES ('waterpolo');
+INSERT INTO Palabras (palabra) VALUES ('whisky');
+INSERT INTO Palabras (palabra) VALUES ('waffles');
+INSERT INTO Palabras (palabra) VALUES ('webinar');
+INSERT INTO Palabras (palabra) VALUES ('xilófono');
+INSERT INTO Palabras (palabra) VALUES ('xenón');
+INSERT INTO Palabras (palabra) VALUES ('xerox');
+INSERT INTO Palabras (palabra) VALUES ('yóquey');
+INSERT INTO Palabras (palabra) VALUES ('yogur');
+INSERT INTO Palabras (palabra) VALUES ('yunque');
+INSERT INTO Palabras (palabra) VALUES ('yema');
+INSERT INTO Palabras (palabra) VALUES ('zócalo');
+INSERT INTO Palabras (palabra) VALUES ('zapato');
+INSERT INTO Palabras (palabra) VALUES ('zorro');
+INSERT INTO Palabras (palabra) VALUES ('zurdo');
+INSERT INTO Palabras (palabra) VALUES ('zumba');
+

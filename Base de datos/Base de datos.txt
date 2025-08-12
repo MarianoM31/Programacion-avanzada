@@ -1,5 +1,0 @@
-jdbc:sqlserver://mariano.database.windows.net:1433;database=DB_Mariano;user=localhost@mariano;password={your_password_here};encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30;
-
-Username: localhost
-Password: Venus2025
-
