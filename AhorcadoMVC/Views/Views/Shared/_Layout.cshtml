@@ -1,0 +1,39 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title - Proyecto Grupo #2</title>
+    <link rel="stylesheet" href="~/Resources/Icons/bootstrap-icons.css">
+    <script src="~/Scripts/jquery-3.7.0.js"></script>
+    <script src="~/Scripts/miscript.js"></script>
+    @Styles.Render("~/Content/css")
+    @Scripts.Render("~/bundles/modernizr")
+</head>
+<body class="body-color-frame">
+
+    <header class="site-header">
+        <div class="site-header__container">
+            <a href="@Url.Action("Index","Home")" class="navbar-brand" style="display:flex;align-items:center;height:100%;padding:0;">
+                <img src="@Url.Content("~/Content/img/hangman.png")"
+                     alt="Ahorcado"
+                     class="brand-logo"
+                     style="height:70px;width:auto;display:block;" />
+            </a>
+        </div>
+    </header>
+
+    <div class="container body-content">
+        @RenderBody()
+        <div class="space"></div>
+        <hr />
+        <footer>
+            <p>&copy; @DateTime.Now.Year - Proyecto del Grupo #2</p>
+        </footer>
+    </div>
+
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")
+    @RenderSection("Scripts", required: false)
+</body>
+</html>
