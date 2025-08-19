@@ -174,7 +174,8 @@ namespace AhorcadoMVC.Controllers
                 progreso = MostrarProgreso(palabraCorrecta, letrasUsadas),
                 errores,
                 terminado = gano || perdio,
-                resultado = partida.resultado
+                resultado = partida.resultado,
+                palabra = palabraCorrecta
             });
         }
 
@@ -182,9 +183,13 @@ namespace AhorcadoMVC.Controllers
         public JsonResult ObtenerNombreJugador(int id)
         {
             var jugador = db.Jugadores.FirstOrDefault(j => j.id_jugador == id);
-            return Json(jugador != null ? jugador.nombre : "", JsonRequestBehavior.AllowGet);
-        }
 
+            return Json(new
+            {
+                success = (jugador != null),
+                nombre = jugador != null ? jugador.nombre : ""
+            }, JsonRequestBehavior.AllowGet);
+        }
 
         private string Normalizar(string input)
         {
@@ -206,6 +211,24 @@ namespace AhorcadoMVC.Controllers
                     resultado += "_ ";
             }
             return resultado.Trim();
+        }
+        // GET: /Partida/BuscarJugador?identificacion=123
+        [HttpGet]
+        public JsonResult BuscarJugador(int? identificacion)
+        {
+            if (identificacion == null)
+                return Json(new { exists = false }, JsonRequestBehavior.AllowGet);
+
+            // Usa tu ApplicationDbContext real (ya está definido arriba en este controller)
+            var jugador = db.Jugadores
+                            .Where(j => j.id_jugador == identificacion.Value)
+                            .Select(j => new { j.nombre })
+                            .FirstOrDefault();
+
+            if (jugador == null)
+                return Json(new { exists = false }, JsonRequestBehavior.AllowGet);
+
+            return Json(new { exists = true, nombre = jugador.nombre }, JsonRequestBehavior.AllowGet);
         }
 
         protected override void Dispose(bool disposing)

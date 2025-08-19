@@ -16,6 +16,7 @@ namespace AhorcadoMVC.Controllers
         {
             var model = new NuevaPartidaViewModel();
 
+
             // Cargar niveles desde base de datos
             model.Niveles = _context.Niveles
                 .Select(n => new SelectListItem
