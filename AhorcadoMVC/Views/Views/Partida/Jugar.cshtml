@@ -1,0 +1,271 @@
+﻿@model AhorcadoMVC.Models.JugarPartidaViewModel
+
+@{
+    ViewBag.Title = "Partida";
+}
+
+<main>
+    <h2 class="titulo-partida">Partida de @Model.NombreJugador - Nivel: @Model.Nivel</h2>
+
+    <input type="hidden" id="partida-id" value="@Model.IdPartida" />
+
+    <div id="juego-container" class="juego-container">
+        <!-- Temporizador y Reinicio -->
+        <div class="info-tiempo">
+            <h4>Tiempo:</h4>
+            <h4><span id="tiempo" class="tiempo">@Model.TiempoLimite</span> Segundos</h4>
+
+            @using (Html.BeginForm("Reiniciar", "Partida", FormMethod.Post))
+            {
+                @Html.Hidden("id", Model.IdPartida)
+                <button type="submit" class="btn-reiniciar bi bi-arrow-counterclockwise">Reiniciar</button>
+            }
+        </div>
+
+        <!-- Canvas del Ahorcado -->
+        <canvas id="ahorcado-canvas" class="ahorcado-canvas" width="200" height="250"></canvas>
+
+        <!-- Agregar palabra -->
+        <div class="div-agregar-palabra">
+            <span>¿Quieres agregar una palabra nueva al diccionario?</span><br />
+            <a class="btn-agregar-palabra" href="/Palabra/Agregar">Agregar Palabra</a>
+        </div>
+    </div>
+
+    <div id="info-partida" class="info-partida">
+        <p id="palabra" class="palabra">@(new string('_', Model.Palabra.Length))</p>
+        <p>Errores: <span id="errores" class="errores">0</span> / 5</p>
+    </div>
+
+    <!-- Teclado: generado por JS -->
+    <section class="section-teclado">
+        <div id="teclado" class="teclado"></div>
+    </section>
+
+    <!-- ===== Estilos del teclado ===== -->
+    <style>
+        .section-teclado {
+            margin-top: 18px;
+        }
+
+        #teclado {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            padding: 8px 4px;
+        }
+
+            #teclado .tecla {
+                appearance: none;
+                -webkit-appearance: none;
+                background: #fff;
+                color: #111;
+                border: 2px solid #2d2d2d;
+                border-radius: 10px;
+                padding: 8px 12px;
+                font-weight: 700;
+                line-height: 1;
+                cursor: pointer;
+                box-shadow: 0 2px 0 #2d2d2d;
+                transition: transform .05s ease;
+            }
+
+                #teclado .tecla:active {
+                    transform: translateY(1px);
+                    box-shadow: 0 1px 0 #2d2d2d;
+                }
+
+                #teclado .tecla:disabled {
+                    opacity: .5;
+                    cursor: default;
+                }
+    </style>
+
+    <!-- ===== Estilos del modal ===== -->
+    <style>
+        #resultadoModal .modal-content {
+            border: 0;
+            border-radius: 18px;
+            overflow: hidden;
+            box-shadow: 0 12px 36px rgba(0,0,0,.25)
+        }
+
+        #resultadoModal .modal-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 18px 22px;
+            border-bottom: 0
+        }
+
+        #resultadoModal .modal-body {
+            font-size: 16px;
+            line-height: 1.55;
+            padding: 22px
+        }
+
+        #resultadoModal .modal-footer {
+            padding: 16px 22px;
+            border-top: 0;
+            display: flex;
+            justify-content: center
+        }
+
+        #resultadoModal .modal-title {
+            margin: 0;
+            font-weight: 700
+        }
+
+        #resultadoIcono {
+            font-size: 36px;
+            line-height: 1
+        }
+
+        #resultadoModal.win .modal-header {
+            background: linear-gradient(135deg,#22c55e,#16a34a);
+            color: #fff
+        }
+
+        #resultadoModal.lose .modal-header {
+            background: linear-gradient(135deg,#ef4444,#b91c1c);
+            color: #fff
+        }
+
+        #resultadoModal .btn {
+            border-radius: 10px;
+            padding: 8px 14px;
+            font-weight: 600
+        }
+        /* Botón X estilizado por CSS (evita inline que te salía como texto) */
+        #resultadoModal .modal-header .close {
+            margin-left: auto;
+            font-size: 28px;
+            line-height: 1;
+            background: none;
+            border: 0;
+            color: inherit;
+            opacity: 1;
+        }
+        /* Prioridad de capas y clics */
+        .modal-backdrop {
+            z-index: 2040 !important;
+        }
+
+        #resultadoModal {
+            z-index: 2050 !important;
+        }
+
+            #resultadoModal .modal-dialog {
+                z-index: 2060 !important;
+            }
+
+            #resultadoModal .modal-content {
+                pointer-events: auto;
+            }
+
+            #resultadoModal .modal-body, #resultadoModal .modal-footer {
+                position: relative;
+                z-index: 2;
+            }
+
+            #resultadoModal .btn {
+                pointer-events: auto !important;
+            }
+    </style>
+
+    <!-- Modal de resultado (sin redirecciones) -->
+    <div class="modal fade" id="resultadoModal" tabindex="-1" role="dialog" aria-labelledby="resultadoTitulo" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <span id="resultadoIcono">🏆</span>
+                    <h4 class="modal-title" id="resultadoTitulo">Mensaje</h4>
+                    <!-- X: solo cierra el modal -->
+                    <button id="btnCerrarModal" type="button" class="close" aria-label="Cerrar" onclick="cerrarModalResultado()">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" id="resultadoCuerpo"></div>
+                <div class="modal-footer">
+                    <button id="btnAceptarModal" type="button" class="btn btn-primary" onclick="cerrarModalResultado()">Aceptar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @section Scripts {
+        <script>
+            // Debe existir antes del JS del juego
+            const tiempoLimite = parseInt(@Model.TiempoLimite, 10) || 120;
+
+            // --- Abrir/Cerrar modal robusto (BS3/4/5 + fallback) ---
+            function abrirModalResultado() {
+                var el = document.getElementById('resultadoModal');
+                try {
+                    if (window.bootstrap && window.bootstrap.Modal) {
+                        // Bootstrap 5
+                        window.__modalInst = bootstrap.Modal.getOrCreateInstance(el, { backdrop: 'static', keyboard: true });
+                        window.__modalInst.show();
+                    } else if (typeof $ === 'function' && typeof $('#resultadoModal').modal === 'function') {
+                        // Bootstrap 3/4
+                        $('#resultadoModal').modal({ backdrop: 'static', keyboard: true, show: true });
+                    } else {
+                        // Fallback
+                        $('#resultadoModal').addClass('in').css('display','block'); $('body').addClass('modal-open');
+                    }
+                } catch (e) {
+                    $('#resultadoModal').addClass('in').css('display','block'); $('body').addClass('modal-open');
+                }
+            }
+            function cerrarModalResultado() {
+                // Detener temporizador al cerrar
+                if (window.__detenerTemporizador) window.__detenerTemporizador();
+                var el = document.getElementById('resultadoModal');
+                try {
+                    if (window.bootstrap && window.bootstrap.Modal) {
+                        bootstrap.Modal.getOrCreateInstance(el).hide();
+                    } else if (typeof $ === 'function' && typeof $('#resultadoModal').modal === 'function') {
+                        $('#resultadoModal').modal('hide');
+                    } else {
+                        $('#resultadoModal').removeClass('in').hide();
+                        $('.modal-backdrop').remove();
+                        $('body').removeClass('modal-open');
+                    }
+                } catch (e) {
+                    $('#resultadoModal').removeClass('in').hide();
+                    $('.modal-backdrop').remove();
+                    $('body').removeClass('modal-open');
+                }
+            }
+
+            // Helpers que usa scriptPartida.js
+            window.__setModalWin = function () {
+                var $m = $("#resultadoModal");
+                $m.removeClass("lose").addClass("win");
+                $("#resultadoIcono").text("🏆");
+                $("#resultadoTitulo").text("¡Felicidades! 🎉");
+                $("#resultadoCuerpo").text("Has ganado la partida.");
+                abrirModalResultado();
+            };
+            window.__setModalLose = function (palabra) {
+                var $m = $("#resultadoModal");
+                $m.removeClass("win").addClass("lose");
+                $("#resultadoIcono").text("💀");
+                $("#resultadoTitulo").text("Partida perdida");
+                $("#resultadoCuerpo").text("La palabra correcta era: " + (palabra || ""));
+                abrirModalResultado();
+            };
+
+            // Detén el contador al abrir/cerrar (si tu BS emite estos eventos)
+            $(function () {
+                $("#resultadoModal").on("show.bs.modal hidden.bs.modal", function () {
+                    if (window.__detenerTemporizador) window.__detenerTemporizador();
+                });
+            });
+        </script>
+
+        <!-- Carga el JS del juego (asegura no usar versión cacheada) -->
+        <script src="~/Scripts/scriptPartida.js?v=10"></script>
+    }
+</main>
