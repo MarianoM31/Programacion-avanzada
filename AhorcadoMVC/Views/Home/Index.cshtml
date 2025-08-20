@@ -51,6 +51,7 @@
                         @Html.LabelFor(m => m.Identificacion, "Identificación")
                         @Html.TextBoxFor(m => m.Identificacion, new { id = "identificacion-newrun", required = "required" })
                         @Html.ValidationMessageFor(m => m.Identificacion)
+                        <small id="msgJugador" class="text-muted"></small>
                     </div>
 
                     <div class="input-div">
@@ -58,6 +59,7 @@
                         @Html.TextBoxFor(m => m.Nombre, new { id = "nombre-user-newrun", required = "required" })
                         @Html.ValidationMessageFor(m => m.Nombre)
                     </div>
+
 
                     @* Dropdown *@
                     <div class="input-div">
@@ -85,6 +87,7 @@
 
     @section Scripts {
         <script src="/Scripts/scriptIndex.js"></script>
+
         <script>
             // Toggle del escalafón
             (function () {
@@ -97,5 +100,48 @@
                 });
             })();
         </script>
+        <script>
+(function () {
+    var timer;
+    var $id = $("#identificacion-newrun");
+    var $nombre = $("#nombre-user-newrun");
+    var $msg = $("#msgJugador"); // existe solo si agregaste el <small>
+
+    function buscarJugador() {
+        var val = ($id.val() || "").trim();
+        if (!val) {
+            if ($msg.length) $msg.text("");
+            $nombre.val("").prop("readonly", false);
+            return;
+        }
+
+        $.getJSON("@Url.Action("BuscarJugador", "Partida")", { identificacion: val })
+         .done(function (res) {
+             if (res && res.exists) {
+                 $nombre.val(res.nombre).prop("readonly", true);
+                 if ($msg.length) $msg.text("Jugador encontrado. Nombre auto-completado.");
+             } else {
+                 // No existe -> permitir escribir nombre
+                 $nombre.val("").prop("readonly", false);
+                 if ($msg.length) $msg.text("Nuevo jugador: escribe el nombre.");
+             }
+         })
+         .fail(function () {
+             if ($msg.length) $msg.text("No se pudo verificar la identificación. Inténtalo de nuevo.");
+         });
+    }
+
+    // Debounce: espera 300 ms tras dejar de teclear
+    $id.on("input", function () {
+        clearTimeout(timer);
+        timer = setTimeout(buscarJugador, 300);
+    });
+
+    // También al perder el foco (por si pegan el dato)
+    $id.on("blur", buscarJugador);
+})();
+        </script>
+
+
     }
 </main>
