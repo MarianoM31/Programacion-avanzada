@@ -1,0 +1,147 @@
+﻿@model AhorcadoMVC.Models.NuevaPartidaViewModel
+@{
+    ViewBag.Title = "Home Page";
+}
+
+<main>
+    <section class="row" aria-labelledby="aspnetTitle">
+        <h1 id="title">¡Bienvenido a Ahorcado!</h1>
+    </section>
+
+    <section>
+        <p>
+            <br />Este es el clásico juego del Ahorcado, en el que tu objetivo será adivinar una palabra secreta.
+            <br />Para lograrlo, deberás colocar letra por letra hasta descubrirla por completo.
+            <br />Cada intento incorrecto dibujará una parte del ahorcado, así que piensa bien antes de elegir.
+        </p>
+        <p>
+            <br />Pon a prueba tu vocabulario, tu lógica y tu memoria mientras te diviertes con este entretenido desafío.
+            <br />Puedes jugar las veces que quieras y mejorar tus habilidades con cada partida,
+            <br />podrás sumar puntos con cada partida ganada; de lo contrario se te restarán puntos.
+        </p>
+        <p>
+            <br />¿Podrás descubrir la palabra antes de que se te acabe el tiempo? ¡Haz clic en Nueva Partida y descúbrelo!
+        </p>
+    </section>
+
+    <!-- Botones principales -->
+    <section>
+        <a class="btn-nuevaPartida" id="btnNuevaPartida" href="#">Nueva Partida</a>
+        <button id="btnVerMarcador" class="btn-nuevaPartida" style="margin-left:10px;">Ver escalafón</button>
+        <a class="btn-agregar-palabra" href="/Palabra/Agregar" style="margin-left:10px;">Agregar palabra</a>
+    </section>
+
+    <!-- Contenedor del escalafón (toggle) -->
+    <section id="ranking-wrapper" style="display:none; margin-top:1rem;">
+        @Html.Action("Ranking", "Home")
+    </section>
+
+    <!-- Panel para crear nueva partida -->
+    <section class="display-newrun" id="display-newrun">
+        <div class="form-newrun">
+            <div class="head-newrun">
+                <span class="title-newrun">Nueva Partida</span>
+                <i id="btnCloseXNewRun" class="bi bi-x"></i>
+            </div>
+
+            <div class="input-newrun">
+                @using (Html.BeginForm("Crear", "Partida", FormMethod.Post))
+                {
+                    <div class="input-div">
+                        @Html.LabelFor(m => m.Identificacion, "Identificación")
+                        @Html.TextBoxFor(m => m.Identificacion, new { id = "identificacion-newrun", required = "required" })
+                        @Html.ValidationMessageFor(m => m.Identificacion)
+                        <small id="msgJugador" class="text-muted"></small>
+                    </div>
+
+                    <div class="input-div">
+                        @Html.LabelFor(m => m.Nombre, "Nombre")
+                        @Html.TextBoxFor(m => m.Nombre, new { id = "nombre-user-newrun", required = "required" })
+                        @Html.ValidationMessageFor(m => m.Nombre)
+                    </div>
+
+
+                    @* Dropdown *@
+                    <div class="input-div">
+                        @Html.LabelFor(m => m.IdNivelSeleccionado, "Nivel de Dificultad")
+                        @Html.DropDownListFor(
+                            m => m.IdNivelSeleccionado,
+                            Model.Niveles,
+                            "Seleccione un nivel",
+                            new { @class = "dropdown-div", required = "required" })
+                        @Html.ValidationMessageFor(m => m.IdNivelSeleccionado)
+                    </div>
+
+                    <div class="btns-newrun">
+                        <div>
+                            <button type="submit" class="btn-start-run" id="btn-start-run">Iniciar Partida</button>
+                        </div>
+                        <div>
+                            <a class="btnCloseNewRun" id="btnCloseNewRun" href="#">Cerrar</a>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </section>
+
+    @section Scripts {
+        <script src="/Scripts/scriptIndex.js"></script>
+
+        <script>
+            // Toggle del escalafón
+            (function () {
+                var btn = document.getElementById('btnVerMarcador');
+                var wrap = document.getElementById('ranking-wrapper');
+                btn.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    var isHidden = wrap.style.display === 'none' || wrap.style.display === '';
+                    wrap.style.display = isHidden ? 'block' : 'none';
+                });
+            })();
+        </script>
+        <script>
+(function () {
+    var timer;
+    var $id = $("#identificacion-newrun");
+    var $nombre = $("#nombre-user-newrun");
+    var $msg = $("#msgJugador"); // existe solo si agregaste el <small>
+
+    function buscarJugador() {
+        var val = ($id.val() || "").trim();
+        if (!val) {
+            if ($msg.length) $msg.text("");
+            $nombre.val("").prop("readonly", false);
+            return;
+        }
+
+        $.getJSON("@Url.Action("BuscarJugador", "Partida")", { identificacion: val })
+         .done(function (res) {
+             if (res && res.exists) {
+                 $nombre.val(res.nombre).prop("readonly", true);
+                 if ($msg.length) $msg.text("Jugador encontrado. Nombre auto-completado.");
+             } else {
+                 // No existe -> permitir escribir nombre
+                 $nombre.val("").prop("readonly", false);
+                 if ($msg.length) $msg.text("Nuevo jugador: escribe el nombre.");
+             }
+         })
+         .fail(function () {
+             if ($msg.length) $msg.text("No se pudo verificar la identificación. Inténtalo de nuevo.");
+         });
+    }
+
+    // Debounce: espera 300 ms tras dejar de teclear
+    $id.on("input", function () {
+        clearTimeout(timer);
+        timer = setTimeout(buscarJugador, 300);
+    });
+
+    // También al perder el foco (por si pegan el dato)
+    $id.on("blur", buscarJugador);
+})();
+        </script>
+
+
+    }
+</main>
